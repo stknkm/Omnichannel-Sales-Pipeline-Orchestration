@@ -1,0 +1,309 @@
+version: 2
+
+sources:
+  - name: snowflake
+    database: retail_project
+    schema: public
+    tables:
+      - name: walmart_raw
+        description: >
+          Walmart staging table containing transactional-level sales data enriched with 
+          customer, product, store, supplier, promotional, and weather-related information.
+        columns:
+          - name: transaction_id
+            description: Unique ID for the transaction.
+            tests:
+              - not_null
+              - unique
+
+          - name: transaction_date
+            description: Date of the transaction in proper DATE format (converted from string).
+            tests:
+              - not_null
+
+          - name: customer_id
+            description: Unique identifier of the customer.
+            tests:
+              - not_null
+
+          - name: customer_age
+            description: Age of the customer.
+
+          - name: customer_gender
+            description: Gender of the customer.
+
+          - name: customer_income
+            description: Income level of the customer.
+
+          - name: customer_loyalty_level
+            description: Loyalty tier of the customer (e.g., Silver, Gold, Platinum).
+
+          - name: product_id
+            description: Unique identifier of the product.
+
+          - name: product_name
+            description: Name of the product.
+
+          - name: category
+            description: Product category.
+
+          - name: unit_price
+            description: Unit price of the product at time of sale.
+
+          - name: quantity_sold
+            description: Number of units sold in the transaction.
+
+          - name: actual_demand
+            description: Actual demand observed for the product.
+
+          - name: forecasted_demand
+            description: Predicted demand for the product (forecast).
+
+          - name: payment_method
+            description: Payment method used by the customer (e.g., card, cash).
+
+          - name: promotion_applied
+            description: Flag indicating whether a promotion was applied.
+            tests:
+              - not_null
+
+          - name: promotion_type
+            description: Type of promotion used (e.g., discount, BOGO).
+
+          - name: store_id
+            description: Unique store identifier.
+            tests:
+              - not_null
+
+          - name: store_location
+            description: Physical location of the store.
+
+          - name: inventory_level
+            description: Current inventory level for the product.
+
+          - name: reorder_point
+            description: Threshold below which a product should be reordered.
+
+          - name: reorder_quantity
+            description: Quantity to reorder once inventory falls below threshold.
+
+          - name: stockout_indicator
+            description: Flag indicating if the product was out of stock.
+            tests:
+              - not_null
+
+          - name: supplier_id
+            description: Unique identifier of the supplier.
+
+          - name: supplier_lead_time
+            description: Average time (in days) it takes for the supplier to fulfill an order.
+
+          - name: holiday_indicator
+            description: Boolean indicating whether the transaction occurred during a holiday period.
+            tests:
+              - not_null
+
+          - name: weekday
+            description: Day of the week on which the transaction occurred.
+
+          - name: weather_conditions
+            description: Weather description on the transaction day.
+
+      - name: shopify_raw
+        description: >
+          Shopify sales data containing detailed order-level information, including product details,
+          pricing, customer info, and sales channel metadata.
+        columns:
+          - name: ORDER_ID
+            description: Unique identifier for each order.
+            tests:
+              - not_null
+              - unique
+
+          - name: SKU
+            description: Stock Keeping Unit identifying the product.
+            tests:
+              - not_null
+
+          - name: PRODUCT_NAME
+            description: Name of the product.
+            tests:
+              - not_null
+
+          - name: CATEGORY
+            description: Product category such as electronics, clothing, etc.
+            tests:
+              - not_null
+
+          - name: CUSTOMER_EMAIL
+            description: Email address of the customer who placed the order.
+            tests:
+              - not_null
+
+          - name: ORDER_DATE
+            description: Date when the order was placed.
+            tests:
+              - not_null
+
+          - name: QUANTITY
+            description: Number of units sold in the order.
+            tests:
+              - not_null
+
+          - name: PRICE
+            description: Total price of the order.
+            tests:
+              - not_null
+
+          - name: CHANNEL
+            description: Sales channel through which the order was placed (e.g., Web, Mobile).
+            tests:
+              - not_null
+
+          - name: WEEK
+            description: Week number of the order.
+            tests:
+              - not_null
+
+          - name: YEAR
+            description: Year in which the order was placed.
+            tests:
+              - not_null
+              
+models:
+  - name: stg_shopify
+    description: "Staging model for Shopify raw data with cleaned product names and normalized categories."
+    columns:
+      - name: order_id
+        description: "Unique identifier of the order."
+        tests:
+          - not_null
+          - unique
+
+      - name: sku
+        description: "Stock keeping unit."
+
+      - name: product_name_clean
+        description: "Cleaned and formatted product name."
+
+      - name: category_clean
+        description: "Normalized product category."
+        tests:
+          - accepted_values:
+              values: ['Electronics', 'Appliances', 'Unknown']
+
+      - name: customer_email
+        description: "Email of the customer who placed the order."
+
+      - name: order_date
+        description: "Date of the order."
+
+      - name: quantity
+        description: "Quantity ordered."
+
+      - name: price
+        description: "Unit price of the product."
+
+      - name: channel
+        description: "Sales channel (e.g., web, mobile)."
+
+      - name: year
+        description: "Year of the order."
+
+      - name: week
+        description: "Week number of the order date."   
+
+  - name: stg_walmart
+    description: "Staging model for Walmart raw transactional data with cleaned product names and normalized categories."
+    columns:
+      - name: transaction_date
+        description: "Converted transaction timestamp to date."
+        tests:
+          - not_null
+
+      - name: transaction_id
+        description: "Unique identifier for each transaction."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Unique identifier of the customer."
+
+      - name: product_id
+        description: "Unique identifier of the product."
+
+      - name: product_name_clean
+        description: "Cleaned and formatted product name (InitCap, trimmed)."
+
+      - name: category_clean
+        description: "Normalized product category."
+        tests:
+          - accepted_values:
+              values: ['Electronics', 'Appliances']
+
+      - name: unit_price
+        description: "Price per unit of the product."
+
+      - name: quantity_sold
+        description: "Number of units sold."
+
+      - name: store_id
+        description: "Store identifier where the sale took place."
+
+      - name: store_location
+        description: "Geographical location of the store."
+
+      - name: inventory_level
+        description: "Available stock level at time of transaction."
+
+      - name: reorder_point
+        description: "Minimum inventory level before reorder is triggered."
+
+      - name: reorder_quantity
+        description: "Quantity of product to reorder when below threshold."
+
+      - name: supplier_id
+        description: "Identifier of the product's supplier."
+
+      - name: supplier_lead_time
+        description: "Lead time in days for supplier delivery."
+
+      - name: customer_age
+        description: "Age of the customer."
+
+      - name: customer_gender
+        description: "Gender of the customer."
+
+      - name: customer_income
+        description: "Income level of the customer."
+
+      - name: customer_loyalty_level
+        description: "Loyalty program status of the customer."
+
+      - name: payment_method
+        description: "Payment method used."
+
+      - name: promotion_applied
+        description: "Boolean indicating if promotion was applied."
+
+      - name: promotion_type
+        description: "Type of promotion used."
+
+      - name: weather_conditions
+        description: "Weather at the time of transaction."
+
+      - name: holiday_indicator
+        description: "Indicator whether transaction was on a holiday."
+
+      - name: weekday
+        description: "Day of the week the transaction occurred."
+
+      - name: stockout_indicator
+        description: "Boolean indicating if product was out of stock."
+
+      - name: forecasted_demand
+        description: "Predicted demand for the product."
+
+      - name: actual_demand
+        description: "Actual demand for the product."      
