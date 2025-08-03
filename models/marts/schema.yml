@@ -1,0 +1,207 @@
+version: 2
+
+models:
+  
+  - name: fact_sales
+    description: "Fact table for sales transactions from multiple channels. Includes keys to date, product, and store dimensions."
+    columns:
+      - name: transaction_id
+        description: "Unique identifier of the transaction."
+        tests:
+          - not_null
+          - unique
+
+      - name: transaction_date
+        description: "Date of the transaction."
+
+      - name: date_key
+        description: "Foreign key to dim_dates."
+
+      - name: product_key
+        description: "Foreign key to dim_products."
+
+      - name: sku
+        description: "Stock Keeping Unit from source transaction."
+
+      - name: store_key
+        description: "Foreign key to dim_stores. Only populated for Walmart transactions."
+
+      - name: quantity
+        description: "Number of units sold."
+        tests:
+          - not_null
+
+      - name: price
+        description: "Price per unit of the product."
+
+      - name: revenue
+        description: "Calculated revenue for the transaction (quantity * price)."
+
+      - name: channel
+        description: "Sales channel source: 'walmart', 'shopify', etc."
+        tests:
+          - accepted_values:
+              values: ['walmart', 'shopify']
+              
+  
+  - name: dim_dates
+    description: >
+      Date dimension based on distinct transaction dates from int_sales. 
+      Includes calendar features like weekday, month name, quarter, and weekend flag.
+    columns:
+      - name: date_key
+        description: Surrogate key generated from the transaction date.
+        tests:
+          - not_null
+          - unique
+      - name: transaction_date
+        description: Original transaction date.
+        tests:
+          - not_null
+          - unique
+      - name: year
+        description: Calendar year of the transaction date.
+      - name: month
+        description: Calendar month number (1-12).
+      - name: day
+        description: Day of the month (1-31).
+      - name: weekday_number
+        description: Weekday number (0 = Sunday, 6 = Saturday).
+      - name: weekday_name
+        description: Short name of the weekday (e.g., MON).
+      - name: month_name
+        description: Properly formatted month name (e.g., Jan, Feb).
+      - name: quarter
+        description: Calendar quarter (Q1-Q4).
+      - name: is_weekend
+        description: Boolean indicating if the date is on a weekend.
+  
+
+  - name: dim_products
+    description: >
+      Dimension table for products. Combines cleaned product data from both Shopify and Walmart sources.
+    columns:
+      - name: product_key
+        description: Surrogate key generated from product name, category, SKU, and source system.
+        tests:
+          - not_null
+          - unique
+
+      - name: product_name
+        description: Cleaned product name from source systems.
+
+      - name: category
+        description: Standardized product category (e.g. Electronics, Appliances).
+
+      - name: sku
+        description: SKU or Product ID used to identify product in the source system.
+
+      - name: source_system
+        description: >
+          Source system from which the product originates. Either 'shopify' or 'walmart'.
+        tests:
+          - accepted_values:
+              values: ['shopify', 'walmart']   
+
+  
+  - name: dim_stores
+    description: >
+      Dimension table for physical store locations. Contains distinct store IDs and their geographic locations from the Walmart dataset.
+    columns:
+      - name: store_key
+        description: Surrogate key generated from store_id and store_location.
+        tests:
+          - not_null
+          - unique
+
+      - name: store_id
+        description: Unique identifier for the Walmart store.
+
+      - name: store_location
+        description: Textual description or code for the store's geographic location (e.g. city, region). 
+
+
+ 
+        
+           
+        
+
+      
+
+            
+
+
+
+
+  - name: mart_sales_flat
+    description: >
+      Flat, non-aggregated sales model for visualization and analysis in Looker Studio.
+      Combines transactional data with product, date, and store dimensions.
+
+    columns:
+      - name: transaction_id
+        description: Unique identifier for each transaction
+        tests:
+          - not_null
+          - unique
+
+      - name: transaction_date
+        description: The date the transaction occurred
+        tests:
+          - not_null
+
+      - name: is_weekend
+        description: Indicates whether the transaction occurred on a weekend
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+      - name: product_key
+        description: Foreign key to the product dimension
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_key
+
+      - name: product_name
+        description: Name of the product
+
+      - name: category
+        description: Product category
+
+      - name: channel
+        description: Sales channel 
+        tests:
+          - not_null
+
+      - name: store_id
+        description: Unique identifier for the store
+        tests:
+          - relationships:
+              to: ref('dim_stores')
+              field: store_id
+
+      - name: store_location
+        description: Location or city of the store 
+
+      - name: price
+        description: Price of product 
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              
+      - name: quantity
+        description: Number of product units sold
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+      - name: revenue
+        description: Revenue generated from the transaction
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: " >= 0"
