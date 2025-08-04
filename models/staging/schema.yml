@@ -211,7 +211,10 @@ models:
         description: "Year of the order."
 
       - name: week
-        description: "Week number of the order date."   
+        description: "Week number of the order date."  
+
+        
+         
 
   - name: stg_walmart
     description: "Staging model for Walmart raw transactional data with cleaned product names and normalized categories."
