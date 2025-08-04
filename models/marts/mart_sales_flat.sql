@@ -28,5 +28,3 @@ LEFT JOIN {{ ref('dim_products') }} dp
 
 LEFT JOIN {{ ref('dim_stores') }} ds 
   ON fs.store_key = ds.store_key
-
-
