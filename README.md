@@ -23,9 +23,26 @@ Operating across multiple sales channels presents a major challenge in data frag
 
 The pipeline follows a standard Extract, Load, and Transform (ELT) workflow:
 
-1. **Extract & Load**: Raw sales data from Walmart (CSV) and Shopify (JSON) is ingested daily and loaded into staging tables in Snowflake.  
-2. **Transform & Model (dbt Core)**: dbt is used to clean, standardize, and transform the raw data. The core of this layer is a **star schema** model that includes a `fact_sales` table and dimension tables (`dim_products`, `dim_stores`, `dim_dates`).  
-3. **Visualization (Google Looker Studio)**: The cleaned and modeled data is connected to Google Looker Studio to create an interactive dashboard for business stakeholders.
+1. **Extract & Load**:  
+   - Raw sales data from **Walmart** (CSV) and **Shopify** (CSV) is ingested daily and loaded into staging tables in Snowflake.  
+   - The ingestion process is automated via scheduled jobs, ensuring continuous updates of the data warehouse.  
+
+2. **Transform & Model (dbt Core)**: dbt is used to clean, standardize, and transform raw data into a **star schema** model. Key transformations include:  
+   - Standardizing **date formats** across all tables for consistent temporal analysis.  
+   - Normalizing **product categories** and **product names** to maintain consistency between Shopify and Walmart data.  
+   - Enriching sales data with dimension tables (`dim_products`, `dim_stores`, `dim_dates`).  
+   - Deriving metrics such as revenue per product, units sold, and average price.  
+   - Handling missing or inconsistent data gracefully.  
+   - Ensuring compatibility with both channels' formats (Shopify CSV vs Walmart CSV).  
+
+3. **Data Quality & Testing**:  
+   - Implemented **automatic dbt tests** for uniqueness, non-null constraints, referential integrity, and value ranges.  
+   - Added **custom tests** to check category consistency, valid product codes, and correct date ranges.  
+   - Continuous monitoring ensures that any anomalies or missing data are flagged before they reach the dashboard.  
+
+4. **Visualization (Google Looker Studio)**:  
+   - Cleaned and modeled data is connected to Google Looker Studio.  
+   - Dashboard updates automatically with every new data ingestion, providing stakeholders with near real-time insights.  
 
 ---
 
@@ -42,26 +59,40 @@ The pipeline follows a standard Extract, Load, and Transform (ELT) workflow:
 
 - **Revenue**: Shopify ~$15M, Walmart slightly below $15M  
 - **Quantity Sold**: Shopify ~100K units, Walmart ~12.5K units  
-- **Temporal Trends**: Walmart revenue declined sharply starting **September 2024**, while Shopify remained stable.
+- **Temporal Trends**: For Walmart, no sales are recorded beyond September 2024 due to missing data, not a drop in performance. Automated ingestion jobs ensure new Walmart data will continue to update the warehouse.  
 
 ### Product Performance
 
 - **Category Breakdown**: Electronics 68.6% of total revenue, Appliances 31.4%  
 - **Top Products by Revenue**: TV, Laptop, Fridge, Washing Machine, Tablet  
-- **Category-Specific Trends**: Walmart's revenue drop mainly due to Appliances.
+- **Category-Specific Trends**: Normalized categories allow for accurate cross-channel comparison and top-selling product analysis.
 
 ---
 
 ## Dashboard Insights
-![Dashboard Screenshot](./Dashboard.png)
+[![Dashboard Screenshot](./Dashboard.png)](./Dashboard.png)
+
+The dashboard provides an **interactive view of omnichannel performance**, including:
+- Channel-specific revenue and quantity sold  
+- Product category breakdowns  
+- Temporal trends with automated daily updates  
+- Derived KPIs such as average product price and revenue per store  
+
+> The Looker Studio dashboard updates automatically with every data ingestion, ensuring stakeholders always have access to the latest insights.
+
 ---
 
 ## Conclusions & Future Steps
 
-The implemented data pipeline successfully unifies sales data from disparate sources, providing a clear, holistic view of business performance. Key insights include the dominance of Electronics sales and the abrupt decline in Walmart performance in late 2024.  
+The implemented data pipeline successfully unifies sales data from Shopify and Walmart, providing a **single source of truth**. Key achievements include:
+
+- Fully standardized and transformed sales and dimension data, enabling accurate analytics.  
+- Automated ingestion and transformation jobs, reducing manual work and ensuring up-to-date dashboards.  
+- Comprehensive data quality monitoring through automatic and custom dbt tests.  
+- A robust and flexible data model that can easily integrate additional sales channels in the future.
 
 Future steps could include:  
 
-- **Granular Analysis**: Investigate the cause of the revenue drop in Walmart by analyzing the data by store location or product category.  
-- **Demand Forecasting**: Utilize `forecasted_demand` and `actual_demand` columns to build more accurate predictive models for inventory management.  
+- **Granular Analysis**: Drill down into Walmart data by store location or product category as new data arrives.  
+- **Demand Forecasting**: Utilize `forecasted_demand` and `actual_demand` columns to build predictive models for inventory optimization.  
 - **Marketing Campaign Analysis**: Combine sales data with marketing spend to measure ROI across channels.
