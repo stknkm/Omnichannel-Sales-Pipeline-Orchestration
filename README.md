@@ -22,30 +22,6 @@ Workflow: **Extract → Load → Transform → Visualize**
 
 ## 🖼️ Data Pipeline Architecture
 
-```mermaid
-flowchart LR
-    subgraph Sources
-        A[Shopify\n(CSV)] 
-        B[Walmart\n(CSV)]
-    end
-
-    subgraph Data_Warehouse[Data Warehouse\n(Postgres / Snowflake)]
-        C[Staging\n(stg_shopify, stg_walmart)]
-        D[Intermediate\n(int_sales)]
-        E[Fact & Dimensions\n(fact_sales, dim_products, dim_stores, dim_dates)]
-        F[Mart\n(mart_sales_flat)]
-    end
-
-    subgraph Analytics
-        G[Looker Studio\nDashboard]
-    end
-
-    A --> C
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
 
 
 
