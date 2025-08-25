@@ -53,7 +53,7 @@ The pipeline follows a standard Extract, Load, and Transform (ELT) workflow:
 ---
 
 ## Dashboard Insights
-
+Dashboard.png
 ---
 
 ## Conclusions & Future Steps
