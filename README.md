@@ -51,7 +51,7 @@ An initial analysis of the unified dataset revealed several key insights:
 
 ## Dashboard Insights
 
-![Omnichannel Sales Dashboard]
+Untitled_Report.pdf
 
 ---
 
