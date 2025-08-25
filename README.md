@@ -4,7 +4,7 @@
 
 This project provides a comprehensive end-to-end data pipeline solution for a mid-sized retailer, aiming to unify its **online (Shopify)** and **in-store (Walmart)** sales data. The goal is to provide a single source of truth for all sales metrics, enabling data-driven decisions on inventory, pricing, and marketing strategies.
 
-The pipeline is built on a modern data stack, leveraging **Snowflake** for data warehousing, **dbt Core** for data transformation and modeling, and **Google Looker Studio** for interactive visualization.
+The pipeline is built on a modern data stack, leveraging **Snowflake** for data warehousing, **dbt Core** for data transformation and modeling,**GitHub** for version control and **Google Looker Studio** for interactive visualization.
 
 ---
 
